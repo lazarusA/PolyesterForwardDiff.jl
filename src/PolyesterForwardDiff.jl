@@ -53,10 +53,12 @@ function threaded_gradient!(f::F, Δx::AbstractArray, x::AbstractArray, ::Forwar
     N = length(x)
     d = cld_fast(N, C)
     r = Ref{eltype(Δx)}()
-    function gradient_worker(rΔxx, start, stop, f, C, check)
+    extra_args = (f, C, check)
+    function gradient_worker(rΔxx, start, stop, extra_args)
+        f, C, check = extra_args
         evaluate_chunks!(f, rΔxx, start, stop, ForwardDiff.Chunk{C}(), check)
     end
-    batch(gradient_worker, (1, min(d, Threads.nthreads())), r, Δx, x, f, C, check)
+    batch(gradient_worker, (1, min(d, Threads.nthreads())), r, Δx, x, extra_args)
     r[]
 end
 
