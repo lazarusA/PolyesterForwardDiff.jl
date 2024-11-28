@@ -55,8 +55,8 @@ function threaded_gradient!(f::F, Δx::AbstractArray, x::AbstractArray, ::Forwar
     r = Ref{eltype(Δx)}()
     extra_args = (f, C, check)
     function gradient_worker(rΔxx, start, stop, extra_args)
-        f, C, check = extra_args
-        evaluate_chunks!(f, rΔxx, start, stop, ForwardDiff.Chunk{C}(), check)
+        f, chunk_size, check = extra_args
+        evaluate_chunks!(f, rΔxx, start, stop, ForwardDiff.Chunk{chunk_size}(), check)
     end
     batch(gradient_worker, (1, min(d, Threads.nthreads())), r, Δx, x, extra_args)
     r[]
